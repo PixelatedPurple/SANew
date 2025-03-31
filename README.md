@@ -1,2 +1,2 @@
 # Back soon 
- Join discord for updates [discord server ](https://discord.com/invite/jAQg6xs8vu)
+ Join discord for updates [discord server ](https://discord.gg/7G5r6Xx2By)
