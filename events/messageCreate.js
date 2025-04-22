@@ -12,7 +12,7 @@ module.exports = {
     if (!settings?.automodEnabled) return;
 
     // Anti-Link
-    if (linkRegex.test(message.content)) {
+    if (settings.antiLink && linkRegex.test(message.content)) {
       try {
         await message.delete();
         await message.channel.send({
@@ -24,23 +24,25 @@ module.exports = {
     }
 
     // Anti-Spam
-    const now = Date.now();
-    const key = `${message.guild.id}-${message.author.id}`;
-    if (!userMessages.has(key)) userMessages.set(key, []);
-    const timestamps = userMessages.get(key);
+    if (settings.antiSpam) {
+      const now = Date.now();
+      const key = `${message.guild.id}-${message.author.id}`;
+      if (!userMessages.has(key)) userMessages.set(key, []);
+      const timestamps = userMessages.get(key);
 
-    timestamps.push(now);
-    const recent = timestamps.filter(ts => now - ts < 5000);
-    userMessages.set(key, recent);
+      timestamps.push(now);
+      const recent = timestamps.filter(ts => now - ts < 5000);
+      userMessages.set(key, recent);
 
-    if (recent.length >= 5) {
-      try {
-        await message.delete();
-        await message.channel.send({
-          content: `⚠️ Stop spamming, <@${message.author.id}>!`,
-        });
-      } catch (err) {
-        console.error('Error deleting spam message:', err);
+      if (recent.length >= 5) {
+        try {
+          await message.delete();
+          await message.channel.send({
+            content: `⚠️ Stop spamming, <@${message.author.id}>!`,
+          });
+        } catch (err) {
+          console.error('Error deleting spam message:', err);
+        }
       }
     }
   }
