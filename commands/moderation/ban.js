@@ -1,17 +1,14 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const logToChannel = require('../../utils/logToChannel');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ban')
-    .setDescription('Ban a user from the server')
+    .setDescription('Ban a member')
     .addUserOption(option =>
-      option.setName('user')
-        .setDescription('User to ban')
-        .setRequired(true))
+      option.setName('user').setDescription('User to ban').setRequired(true))
     .addStringOption(option =>
-      option.setName('reason')
-        .setDescription('Reason for banning')
-        .setRequired(false))
+      option.setName('reason').setDescription('Reason').setRequired(false))
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 
   async execute(interaction) {
@@ -20,20 +17,27 @@ module.exports = {
 
     try {
       await interaction.guild.members.ban(user.id, { reason });
+
       const embed = new EmbedBuilder()
         .setTitle('🔨 Member Banned')
+        .setDescription(`${user.tag} has been banned.`)
+        .addFields({ name: 'Reason', value: reason })
         .setColor('Red')
-        .addFields(
-          { name: 'User', value: `${user.tag}`, inline: true },
-          { name: 'Reason', value: reason, inline: true },
-          { name: 'Moderator', value: `<@${interaction.user.id}>`, inline: true }
-        )
         .setTimestamp();
 
       await interaction.reply({ embeds: [embed] });
+
+      await logToChannel(interaction.guild, {
+        title: '🔨 User Banned',
+        fields: [
+          { name: 'User', value: `<@${user.id}>`, inline: true },
+          { name: 'Moderator', value: `<@${interaction.user.id}>`, inline: true },
+          { name: 'Reason', value: reason }
+        ],
+        color: 'Red'
+      });
     } catch (err) {
-      console.error(err);
-      interaction.reply({ content: 'Failed to ban the user.', ephemeral: true });
+      await interaction.reply({ content: `Failed to ban user: ${err.message}`, ephemeral: true });
     }
   }
 };
