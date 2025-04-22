@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model, models } = require('mongoose');
 
 const warnSchema = new Schema({
   userId: String,
@@ -12,4 +12,5 @@ const warnSchema = new Schema({
   ]
 });
 
-module.exports = model('Warning', warnSchema);
+// ✅ Only compile if it doesn't already exist
+module.exports = models.Warning || model('Warning', warnSchema);

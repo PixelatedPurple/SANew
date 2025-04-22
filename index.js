@@ -27,6 +27,14 @@ fs.readdirSync(ds).forEach(dir => {
     }
   }
 });
+//status event 
+client.once('ready', () => {
+  console.log(`🤖 Automod Bot ready as ${client.user.tag}`);
+  client.user.setPresence({
+    activities: [{ name: 'your server 👀', type: 3 }],
+    status: 'online'
+  });
+});
 
 // Slash command handler
 client.on('interactionCreate', async interaction => {
@@ -62,7 +70,7 @@ const warnSchema = new Schema({
     }
   ]
 });
-client.warnModel = model('Warning', warnSchema);
+
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -75,10 +83,3 @@ mongoose.connect(process.env.MONGO_URI, {
   console.error('❌ MongoDB connection error:', err);
 });
 
-client.once('ready', () => {
-  console.log(`🤖 Automod Bot ready as ${client.user.tag}`);
-  client.user.setPresence({
-    activities: [{ name: 'your server 👀', type: 3 }],
-    status: 'online'
-  });
-});
