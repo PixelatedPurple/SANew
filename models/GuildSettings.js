@@ -6,6 +6,7 @@ const settingsSchema = new Schema({
   antiLink: { type: Boolean, default: false },
   antiSpam: { type: Boolean, default: false },
   antiGhostPing: { type: Boolean, default: false },
+  logChannelId: { type: String, default: null },
 });
 
 module.exports = model('GuildSettings', settingsSchema);
