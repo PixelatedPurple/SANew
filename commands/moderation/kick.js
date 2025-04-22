@@ -1,42 +1,43 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const logToChannel = require('../../utils/logToChannel');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('kick')
-    .setDescription('Kick a member from the server')
+    .setDescription('Kick a member')
     .addUserOption(option =>
-      option.setName('user')
-        .setDescription('The member to kick')
-        .setRequired(true))
+      option.setName('user').setDescription('User to kick').setRequired(true))
     .addStringOption(option =>
-      option.setName('reason')
-        .setDescription('Reason for the kick')
-        .setRequired(false))
+      option.setName('reason').setDescription('Reason').setRequired(false))
     .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
 
   async execute(interaction) {
-    const user = interaction.options.getUser('user');
+    const member = interaction.options.getMember('user');
     const reason = interaction.options.getString('reason') || 'No reason provided';
-    const member = interaction.guild.members.cache.get(user.id);
 
-    if (!member) return interaction.reply({ content: 'User not found in this server.', ephemeral: true });
-
-    try {
-      await member.kick(reason);
-      const embed = new EmbedBuilder()
-        .setTitle('👢 Member Kicked')
-        .setColor('Red')
-        .addFields(
-          { name: 'User', value: `${user.tag}`, inline: true },
-          { name: 'Reason', value: reason, inline: true },
-          { name: 'Moderator', value: `<@${interaction.user.id}>`, inline: true }
-        )
-        .setTimestamp();
-
-      await interaction.reply({ embeds: [embed] });
-    } catch (err) {
-      console.error(err);
-      interaction.reply({ content: 'Failed to kick the user.', ephemeral: true });
+    if (!member.kickable) {
+      return interaction.reply({ content: 'I cannot kick this user.', ephemeral: true });
     }
+
+    await member.kick(reason);
+
+    const embed = new EmbedBuilder()
+      .setTitle('👢 Member Kicked')
+      .setDescription(`${member.user.tag} was kicked.`)
+      .addFields({ name: 'Reason', value: reason })
+      .setColor('Orange')
+      .setTimestamp();
+
+    await interaction.reply({ embeds: [embed] });
+
+    await logToChannel(interaction.guild, {
+      title: '👢 User Kicked',
+      fields: [
+        { name: 'User', value: `<@${member.id}>`, inline: true },
+        { name: 'Moderator', value: `<@${interaction.user.id}>`, inline: true },
+        { name: 'Reason', value: reason }
+      ],
+      color: 'Orange'
+    });
   }
 };
