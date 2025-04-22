@@ -2,7 +2,7 @@
 
 A powerful moderation Discord bot built with Discord.js v14, Mongoose, and Firebase, designed to keep your server clean, safe, and automated.
 
-![Automod Banner](https://cwkbot.fun/bot.png)
+![Automod Banner](https://cwkbot.fun/botbanner.png)
 
 ---
 
