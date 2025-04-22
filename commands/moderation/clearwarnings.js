@@ -1,29 +1,33 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const Warn = require('../../models/Warn');
+const logToChannel = require('../../utils/logToChannel');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('clearwarnings')
+    .setName('clearwarns')
     .setDescription('Clear all warnings for a user')
-    .addUserOption(option =>
-      option.setName('user')
-        .setDescription('User to clear warnings for')
-        .setRequired(true))
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+    .addUserOption(option => option.setName('user').setDescription('User to clear warnings for').setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
 
-  async execute(interaction, client) {
+  async execute(interaction) {
     const user = interaction.options.getUser('user');
-
-    await client.warnModel.findOneAndDelete({
-      userId: user.id,
-      guildId: interaction.guild.id
-    });
+    const result = await Warn.findOneAndDelete({ userId: user.id, guildId: interaction.guild.id });
 
     const embed = new EmbedBuilder()
-      .setTitle('✅ Warnings Cleared')
-      .setDescription(`All warnings for **${user.tag}** have been cleared.`)
+      .setTitle('🧹 Warnings Cleared')
+      .setDescription(result ? `Cleared all warnings for ${user.tag}` : `No warnings to clear for ${user.tag}`)
       .setColor('Green')
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });
+
+    await logToChannel(interaction.guild, {
+      title: '🧹 Warnings Cleared',
+      fields: [
+        { name: 'User', value: `<@${user.id}>`, inline: true },
+        { name: 'Moderator', value: `<@${interaction.user.id}>`, inline: true }
+      ],
+      color: 'Green'
+    });
   }
 };
