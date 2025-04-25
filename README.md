@@ -91,7 +91,7 @@ All commands are organized in the `/commands` folder and auto-loaded by category
 ### 🧪 Future Ideas
 
 - [ ] Captcha on join (anti-raid)
-- [ ] Dashboard theming (match drift.rip style)
+- [ ] Dashboard theming (Dark )
 - [ ] Analytics dashboard (number of mutes/bans per day)
 - [ ] Multi-language support
 
