@@ -2,7 +2,9 @@ require('dotenv').config();
 const { Client, GatewayIntentBits, Collection, Partials, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const mongoose = require('mongoose');
-
+const path = require('path');
+const express = require('express');
+const deploy = require ('./deploy-commands.js')
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -17,98 +19,52 @@ const client = new Client({
 client.commands = new Collection();
 
 // Load commands
-const ds = './commands';
-fs.readdirSync(ds).forEach(dir => {
-  const commandFiles = fs.readdirSync(`${ds}/${dir}`).filter(file => file.endsWith('.js'));
+const commandsPath = path.join(__dirname, 'commands');
+fs.readdirSync(commandsPath).forEach(dir => {
+  const commandFiles = fs.readdirSync(path.join(commandsPath, dir)).filter(file => file.endsWith('.js'));
   for (const file of commandFiles) {
-    const command = require(`${ds}/${dir}/${file}`);
+    const command = require(path.join(commandsPath, dir, file));
     if (command.data && command.execute) {
       client.commands.set(command.data.name, command);
     }
   }
 });
-//status event 
+
+// Status event
 client.once('ready', () => {
-  console.log(`🤖 Automod Bot ready as ${client.user.tag}`);
+  console.log(`✅ Bot ready as ${client.user.tag}`);
   client.user.setPresence({
     activities: [{ name: 'your server 👀', type: 3 }],
     status: 'online'
   });
 });
 
-// Slash command handler
+// Clean interaction handler
 client.on('interactionCreate', async interaction => {
-  if (!interaction.isChatInputCommand()) return;
-  const command = client.commands.get(interaction.commandName);
-  if (!command) return;
-  try {
-    await command.execute(interaction, client);
-  } catch (error) {
-    console.error(`Error executing command ${interaction.commandName}:`, error);
-    const errorEmbed = new EmbedBuilder()
-      .setTitle('❌ Command Error')
-      .setDescription('There was an error executing this command.')
-      .setColor('Red');
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
-    } else {
-      await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
-    }
-  }
-});
-
-// MongoDB model for warnings
-const { Schema, model } = require('mongoose');
-const warnSchema = new Schema({
-  userId: String,
-  guildId: String,
-  warnings: [
-    {
-      modId: String,
-      reason: String,
-      date: { type: Date, default: Date.now }
-    }
-  ]
-});
- // interaction Create event 
-client.on('interactionCreate', async interaction => {
-  // Dropdown handler
-  if (interaction.isStringSelectMenu() && interaction.customId === 'help-menu') {
-    const selectedCategory = interaction.values[0];
-    const fs = require('fs');
-    const path = require('path');
-    const { EmbedBuilder } = require('discord.js');
-
-    const commandsPath = path.join(__dirname, `commands`, selectedCategory);
-    let desc = '';
+  if (interaction.isChatInputCommand()) {
+    const command = client.commands.get(interaction.commandName);
+    if (!command) return;
 
     try {
-      const files = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-      for (const file of files) {
-        const command = require(`${commandsPath}/${file}`);
-        if (command.data) {
-          desc += `• **/${command.data.name}** - ${command.data.description}\n`;
-        }
+      await command.execute(interaction, client);
+    } catch (error) {
+      console.error(`Error executing command ${interaction.commandName}:`, error);
+      const errorEmbed = new EmbedBuilder()
+        .setTitle('❌ Command Error')
+        .setDescription('There was an error executing this command.')
+        .setColor('Red');
+
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
+      } else {
+        await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
       }
-
-      const embed = new EmbedBuilder()
-        .setTitle(`📂 ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Commands`)
-        .setDescription(desc || 'No commands found in this category.')
-        .setColor('#2f3136');
-
-      await interaction.update({ embeds: [embed], components: interaction.message.components });
-    } catch (err) {
-      console.error(err);
-      await interaction.update({
-        content: '❌ Failed to load commands for this category.',
-        components: [],
-        embeds: [],
-      });
     }
   }
+
+  // Handle other types of interactions here if needed
+  // Example: button/menu interactions can go here
 });
-
-
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -121,3 +77,32 @@ mongoose.connect(process.env.MONGO_URI, {
   console.error('❌ MongoDB connection error:', err);
 });
 
+// Event loader
+const eventsPath = path.join(__dirname, 'events');
+if (fs.existsSync(eventsPath)) {
+  const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+
+  for (const file of eventFiles) {
+    const event = require(path.join(eventsPath, file));
+    if (event.once) {
+      client.once(event.name, (...args) => event.execute(...args, client));
+    } else {
+      client.on(event.name, (...args) => event.execute(...args, client));
+    }
+  }
+}
+
+// KeepAlive server for Replit
+const app = express();
+app.get('/', (req, res) => {
+  res.send('Bot is alive!');
+});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`[+] KeepAlive server running on port ${PORT}`);
+});
+
+// Error catcher
+process.on('unhandledRejection', error => {
+  console.error('Unhandled promise rejection:', error);
+});

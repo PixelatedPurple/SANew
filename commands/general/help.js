@@ -1,51 +1,54 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('help')
-    .setDescription('View help menu with command categories.'),
+    .setDescription('View all available bot commands by category.'),
 
   async execute(interaction) {
-    // Dynamically fetch folder names from /commands
-    const commandFolders = fs.readdirSync(path.join(__dirname, '..')).filter(folder =>
-      fs.statSync(path.join(__dirname, '..', folder)).isDirectory()
-    );
+    const categoryMap = {
+      general: { emoji: '⚙️', label: 'General' },
+      moderation: { emoji: '🛡️', label: 'Moderation' },
+      fun: { emoji: '🎮', label: 'Fun' },
+      utility: { emoji: '🧰', label: 'Utility' },
+      economy: { emoji: '💰', label: 'Economy' },
+      music: { emoji: '🎵', label: 'Music' }
+    };
 
-    const options = commandFolders.map(folder => ({
-      label: folder.charAt(0).toUpperCase() + folder.slice(1),
-      value: folder
-    }));
+    const commandsPath = path.join(__dirname, '..', '..', 'commands');
+    const categories = fs.readdirSync(commandsPath).filter(dir =>
+      fs.statSync(path.join(commandsPath, dir)).isDirectory()
+    );
 
     const embed = new EmbedBuilder()
-      .setTitle('📘 Help Menu')
-      .setDescription('Use the dropdown below to explore commands by category.\n\n[Support Server](https://cwkbot.fun/discord) | [Dashboard](https://bot.cwkbot.fun)')
+      .setTitle('📖 Bot Help Menu')
       .setColor('#5865F2')
-      .setFooter({ text: 'Automod Bot - Your moderation partner' });
+      .setThumbnail(interaction.client.user.displayAvatarURL({ size: 128 }))
+      .setTimestamp()
+      .setFooter({
+        text: interaction.client.user.username,
+        iconURL: interaction.client.user.displayAvatarURL()
+      });
 
-    const menu = new ActionRowBuilder().addComponents(
-      new StringSelectMenuBuilder()
-        .setCustomId('help-menu')
-        .setPlaceholder('Select a category')
-        .addOptions(options)
-    );
+    for (const category of categories) {
+      const files = fs.readdirSync(path.join(commandsPath, category)).filter(file => file.endsWith('.js'));
 
-    const links = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setLabel('Support Server')
-        .setURL('https://cwkbot.fun/discord')
-        .setStyle(ButtonStyle.Link),
-      new ButtonBuilder()
-        .setLabel('Dashboard')
-        .setURL('https://bot.cwkbot.fun')
-        .setStyle(ButtonStyle.Link)
-    );
+      const commandList = files
+        .map(file => {
+          const command = require(path.join(commandsPath, category, file));
+          return command.data ? `• \`/${command.data.name}\` - ${command.data.description}` : null;
+        })
+        .filter(Boolean)
+        .join('\n');
 
-    await interaction.reply({
-      embeds: [embed],
-      components: [menu, links],
-      ephemeral: true,
-    });
-  },
+      if (commandList) {
+        const { emoji, label } = categoryMap[category] || { emoji: '📁', label: category };
+        embed.addFields({ name: `${emoji} ${label}`, value: commandList });
+      }
+    }
+
+    await interaction.reply({ embeds: [embed], ephemeral: true });
+  }
 };
