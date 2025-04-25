@@ -70,6 +70,44 @@ const warnSchema = new Schema({
     }
   ]
 });
+ // interaction Create event 
+client.on('interactionCreate', async interaction => {
+  // Dropdown handler
+  if (interaction.isStringSelectMenu() && interaction.customId === 'help-menu') {
+    const selectedCategory = interaction.values[0];
+    const fs = require('fs');
+    const path = require('path');
+    const { EmbedBuilder } = require('discord.js');
+
+    const commandsPath = path.join(__dirname, `commands`, selectedCategory);
+    let desc = '';
+
+    try {
+      const files = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+      for (const file of files) {
+        const command = require(`${commandsPath}/${file}`);
+        if (command.data) {
+          desc += `• **/${command.data.name}** - ${command.data.description}\n`;
+        }
+      }
+
+      const embed = new EmbedBuilder()
+        .setTitle(`📂 ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Commands`)
+        .setDescription(desc || 'No commands found in this category.')
+        .setColor('#2f3136');
+
+      await interaction.update({ embeds: [embed], components: interaction.message.components });
+    } catch (err) {
+      console.error(err);
+      await interaction.update({
+        content: '❌ Failed to load commands for this category.',
+        components: [],
+        embeds: [],
+      });
+    }
+  }
+});
+
 
 
 // MongoDB connection
