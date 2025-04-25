@@ -1,56 +1,51 @@
-const {
-  SlashCommandBuilder,
-  ActionRowBuilder,
-  StringSelectMenuBuilder,
-  EmbedBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-} = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('help')
-    .setDescription('View all commands organized by category'),
+    .setDescription('View help menu with command categories.'),
 
   async execute(interaction) {
-    const commandPath = path.join(__dirname, '../');
-    const categories = fs.readdirSync(commandPath).filter(folder => fs.statSync(path.join(commandPath, folder)).isDirectory());
-
-    const menu = new StringSelectMenuBuilder()
-      .setCustomId('help-menu')
-      .setPlaceholder('Select a category')
-      .addOptions(
-        categories.map(cat => ({
-          label: cat.charAt(0).toUpperCase() + cat.slice(1),
-          value: cat,
-          description: `Commands under ${cat}`,
-        }))
-      );
-
-    const row = new ActionRowBuilder().addComponents(menu);
-
-    const buttons = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setLabel('Support Server')
-        .setStyle(ButtonStyle.Link)
-        .setURL('https://cwkbot.fun/discord'),
-      new ButtonBuilder()
-        .setLabel('Dashboard')
-        .setStyle(ButtonStyle.Link)
-        .setURL('https://bot.cwkbot.fun')
+    // Dynamically fetch folder names from /commands
+    const commandFolders = fs.readdirSync(path.join(__dirname, '..')).filter(folder =>
+      fs.statSync(path.join(__dirname, '..', folder)).isDirectory()
     );
+
+    const options = commandFolders.map(folder => ({
+      label: folder.charAt(0).toUpperCase() + folder.slice(1),
+      value: folder
+    }));
 
     const embed = new EmbedBuilder()
       .setTitle('📘 Help Menu')
-      .setDescription('Use the dropdown below to explore commands by category.')
-      .setColor('#2f3136')
-      .setFooter({
-        text: 'Automod Bot - Your moderation partner',
-        iconURL: interaction.client.user.displayAvatarURL(),
-      });
+      .setDescription('Use the dropdown below to explore commands by category.\n\n[Support Server](https://cwkbot.fun/discord) | [Dashboard](https://bot.cwkbot.fun)')
+      .setColor('#5865F2')
+      .setFooter({ text: 'Automod Bot - Your moderation partner' });
 
-    await interaction.reply({ embeds: [embed], components: [row, buttons], ephemeral: true });
+    const menu = new ActionRowBuilder().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId('help-menu')
+        .setPlaceholder('Select a category')
+        .addOptions(options)
+    );
+
+    const links = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel('Support Server')
+        .setURL('https://cwkbot.fun/discord')
+        .setStyle(ButtonStyle.Link),
+      new ButtonBuilder()
+        .setLabel('Dashboard')
+        .setURL('https://bot.cwkbot.fun')
+        .setStyle(ButtonStyle.Link)
+    );
+
+    await interaction.reply({
+      embeds: [embed],
+      components: [menu, links],
+      ephemeral: true,
+    });
   },
 };
