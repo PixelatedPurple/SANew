@@ -96,6 +96,15 @@ All commands are organized in the `/commands` folder and auto-loaded by category
 - [ ] Multi-language support
 
 ---
+<h3 align='center'> Bot support server </h3>
+
+<div align="center"> <a href="https://discord.gg/uC5bAzvmX5"><img src="http://invidget.switchblade.xyz/uC5bAzvmX5"/></a>
+
+<br><br>
+
+</div>
+
+
 
 ## 👤 Author
 
