@@ -1,6 +1,6 @@
 # 🤖 Automod Bot
 
-A powerful moderation Discord bot built with Discord.js v14, Mongoose, and Firebase, designed to keep your server clean, safe, and automated.
+A powerful moderation Discord bot built with Discord.js v14, Mongoose, designed to keep your server clean, safe, and automated.
 
 ![Automod Banner](https://cwkbot.fun/botbanner.png)
 
@@ -64,10 +64,10 @@ node deploy.js
 
 All commands are organized in the `/commands` folder and auto-loaded by category. Use `/help` to view all.
 
+- Admin
+- Info
 - Moderation
-- Utility
-- Configuration
-- Logging
+- Owner 
 
 ---
 
