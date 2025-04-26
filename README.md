@@ -67,6 +67,7 @@ All commands are organized in the `/commands` folder and auto-loaded by category
 - Admin
 - Info
 - Moderation
+- General 
 - Owner 
 
 ---
