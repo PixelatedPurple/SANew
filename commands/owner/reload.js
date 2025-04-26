@@ -12,7 +12,7 @@ module.exports = {
                 .setRequired(true)),
 
     async execute(interaction) {
-        if (interaction.user.id !== 'YOUR_USER_ID') return interaction.reply({ content: '❌ You are not authorized.', ephemeral: true });
+        if (interaction.user.id !== '682981714523586606') return interaction.reply({ content: '❌ You are not authorized.', ephemeral: true });
 
         const commandName = interaction.options.getString('command').toLowerCase();
         const command = interaction.client.commands.get(commandName);
