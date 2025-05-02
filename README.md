@@ -5,7 +5,7 @@ A powerful moderation Discord bot built with Discord.js v14, Mongoose, designed 
 ![Automod Banner](https://cwkbot.fun/botbanner.png)
 
 ---
-
+[invite the bot](https://discord.com/oauth2/authorize?client_id=1363943273374154842&permissions=8&scope=bot%20applications.Commands)
 ## 🚀 Features
 
 - Slash commands with auto-detection and pagination help menu
