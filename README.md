@@ -99,10 +99,9 @@ All commands are organized in the `/commands` folder and auto-loaded by category
 ---
 <h3 align='center'> Bot support server </h3>
 
-<div align="center"> <a href="https://discord.gg/uC5bAzvmX5"><img src="http://invidget.switchblade.xyz/uC5bAzvmX5"/></a>
+<div align="center"> <a href="https://discord.gg/QukxRRFhzQ"><img src="https://invidget.switchblade.xyz/QukxRRFhzQ"/></a>
 
 <br><br>
-
 </div>
 
 
