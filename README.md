@@ -2,7 +2,7 @@
 
 A powerful moderation Discord bot built with Discord.js v14, Mongoose, designed to keep your server clean, safe, and automated.
 
-![Automod Banner](https://cwkbot.fun/botbanner.png)
+![Automod Banner](https://dcflipybird.netlify.app/botbanner.png)
 
 ---
 [invite the bot](https://discord.com/oauth2/authorize?client_id=1363943273374154842&permissions=8&scope=bot%20applications.Commands)
