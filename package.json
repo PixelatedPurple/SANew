@@ -1,0 +1,22 @@
+{
+  "name": "automod-bot",
+  "version": "1.0.0",
+  "description": "A powerful Discord moderation bot with auto mod, slash commands, and a dashboard",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "deploy": "node deploy-commands.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Khanmanan/automod-bot.git"
+  },
+  "author": "cwkhan",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.13.0",
+    "dotenv": "^16.3.1",
+    "mongoose": "^7.6.1",
+    "moment": "^2.29.4"
+  }
+}
